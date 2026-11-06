@@ -12,20 +12,14 @@ enum DesignCatalog {
 
     /// Register every design screen here.
     static let entries: [Entry] = [
-        // Entry(id: "evening-plan", title: "Tonight") { AnyView(EveningPlanScreen()) },
-        Entry(id: "evening-plan", title: "Tonight") { AnyView(EveningPlanScreen()) },
-        Entry(id: "tomorrow-set", title: "Tomorrow is set") { AnyView(TomorrowSetScreen()) },
-        Entry(id: "morning-open", title: "Morning") { AnyView(MorningOpenScreen()) },
-        Entry(id: "night-check", title: "Night check") { AnyView(NightCheckScreen()) },
-        Entry(id: "missed-day", title: "Missed day") { AnyView(MissedDayScreen()) },
-        Entry(id: "badge-earned", title: "Badge earned") { AnyView(BadgeEarnedScreen()) },
-        Entry(id: "badges", title: "Milestones") { AnyView(BadgesScreen()) },
-        Entry(id: "milestones-v1", title: "Milestones · Monument") { AnyView(MilestonesMonumentScreen()) },
-        Entry(id: "milestones-v2", title: "Milestones · Instrument") { AnyView(MilestonesInstrumentScreen()) },
-        Entry(id: "milestones-v3", title: "Milestones · Editorial") { AnyView(MilestonesEditorialScreen()) },
-        Entry(id: "tonight-v1", title: "Tonight · Monument") { AnyView(TonightMonumentScreen()) },
-        Entry(id: "tonight-v2", title: "Tonight · Instrument") { AnyView(TonightInstrumentScreen()) },
-        Entry(id: "tonight-v3", title: "Tonight · Editorial") { AnyView(TonightEditorialScreen()) },
+        // Chosen direction: "Instrument".
+        Entry(id: "evening-plan", title: "Tonight") { AnyView(TonightInstrumentScreen()) },
+        Entry(id: "tomorrow-set", title: "Tomorrow is set") { AnyView(TomorrowSetInstrumentScreen()) },
+        Entry(id: "morning-open", title: "Morning") { AnyView(MorningOpenInstrumentScreen()) },
+        Entry(id: "night-check", title: "Night check") { AnyView(NightCheckInstrumentScreen()) },
+        Entry(id: "missed-day", title: "Missed day") { AnyView(MissedDayInstrumentScreen()) },
+        Entry(id: "badge-earned", title: "Badge earned") { AnyView(BadgeEarnedInstrumentScreen()) },
+        Entry(id: "badges", title: "Milestones") { AnyView(MilestonesInstrumentScreen()) },
     ]
 
     static var requestedID: String? {
