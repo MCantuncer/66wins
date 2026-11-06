@@ -86,7 +86,7 @@ struct BadgesScreen: View {
             Spacer(minLength: Spacing.xs)
             Pill(
                 text: "\(sample.today)/66",
-                systemImage: "calendar",
+                systemImage: "square.grid.3x3.fill",
                 accessibilityText: "Day \(sample.today) of 66"
             )
         }
@@ -104,12 +104,8 @@ struct BadgesScreen: View {
                 size: 132,
                 litTicks: milestone.id
             )
-            VStack(spacing: Spacing.xxs) {
-                Text("Day \(milestone.id)")
-                    .textStyle(.headline)
-                    .foregroundStyle(isEarned ? Theme.textPrimary : Theme.textSecondary)
-                caption(for: milestone)
-            }
+            // The medal already shows the number: the caption carries only date or countdown.
+            caption(for: milestone)
         }
         .frame(maxWidth: .infinity)
         .accessibilityElement(children: .ignore)

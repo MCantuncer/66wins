@@ -27,7 +27,18 @@ for id in $IDS; do
     xcrun simctl terminate "$DEVICE" "$BUNDLE" 2>/dev/null || true
     if [ "$mode" = light ]; then xcrun simctl launch "$DEVICE" "$BUNDLE" -screen "$id" -light >/dev/null
     else xcrun simctl launch "$DEVICE" "$BUNDLE" -screen "$id" >/dev/null; fi
-    sleep 2.5
+    # Wait for the first real frame. A cold launch on CI can take longer than a fixed
+    # sleep; an undrawn app gives an all-black frame that compresses to a tiny PNG.
+    sleep 3
+    for attempt in 1 2 3 4 5 6; do
+      xcrun simctl io "$DEVICE" screenshot "$OUT/$id-$mode.png" >/dev/null
+      SIZE=$(stat -f%z "$OUT/$id-$mode.png" 2>/dev/null || stat -c%s "$OUT/$id-$mode.png")
+      if [ "$SIZE" -gt 120000 ]; then break; fi
+      echo "  $id-$mode looks blank ($SIZE bytes), retry $attempt"
+      sleep 2
+    done
+    # Let springs and fades settle, then take the final frame.
+    sleep 1
     xcrun simctl io "$DEVICE" screenshot "$OUT/$id-$mode.png" >/dev/null
     echo "rendered $OUT/$id-$mode.png"
   done

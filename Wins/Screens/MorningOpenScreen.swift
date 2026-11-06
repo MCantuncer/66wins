@@ -21,15 +21,16 @@ struct MorningOpenScreen: View {
         static let saturday = Sample(
             weekday: "Saturday",
             day: 24,
-            reason: "The Lisbon pitch leaves my desk by noon.",
-            firstWin: "Run 5k",
-            firstWinSymbol: "figure.run",
-            firstWinTime: "07:00",
-            firstWinMinutes: 40,
+            // Same day the user planned last night (SampleDay), so the flow reads as one story.
+            reason: SampleDay.reason,
+            firstWin: "Write 500 words",
+            firstWinSymbol: "pencil",
+            firstWinTime: "7:00",
+            firstWinMinutes: 45,
             segments: [
-                DaySegment(id: 0, start: 7, duration: 40.0 / 60.0, state: .focus),
-                DaySegment(id: 1, start: 9.5, duration: 2, state: .muted),
-                DaySegment(id: 2, start: 19.5, duration: 1.5, state: .muted),
+                DaySegment(id: 0, start: 7, duration: 0.75, state: .focus),
+                DaySegment(id: 1, start: 12.5, duration: 0.75, state: .muted),
+                DaySegment(id: 2, start: 19, duration: 0.5, state: .muted),
             ]
         )
     }
@@ -72,7 +73,7 @@ struct MorningOpenScreen: View {
         HStack {
             Pill(
                 text: "\(sample.day)/66",
-                systemImage: "calendar",
+                systemImage: "square.grid.3x3.fill",
                 accessibilityText: "Day \(sample.day) of 66"
             )
             Spacer(minLength: Spacing.xs)
