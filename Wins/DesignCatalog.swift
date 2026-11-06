@@ -13,7 +13,13 @@ enum DesignCatalog {
     /// Register every design screen here.
     static let entries: [Entry] = [
         // Entry(id: "evening-plan", title: "Tonight") { AnyView(EveningPlanScreen()) },
-        Entry(id: "pipeline-check", title: "Pipeline check") { AnyView(PipelineCheckScreen()) },
+        Entry(id: "evening-plan", title: "Tonight") { AnyView(EveningPlanScreen()) },
+        Entry(id: "tomorrow-set", title: "Tomorrow is set") { AnyView(TomorrowSetScreen()) },
+        Entry(id: "morning-open", title: "Morning") { AnyView(MorningOpenScreen()) },
+        Entry(id: "night-check", title: "Night check") { AnyView(NightCheckScreen()) },
+        Entry(id: "missed-day", title: "Missed day") { AnyView(MissedDayScreen()) },
+        Entry(id: "badge-earned", title: "Badge earned") { AnyView(BadgeEarnedScreen()) },
+        Entry(id: "badges", title: "Milestones") { AnyView(BadgesScreen()) },
     ]
 
     static var requestedID: String? {
