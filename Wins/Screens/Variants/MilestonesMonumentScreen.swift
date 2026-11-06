@@ -28,11 +28,13 @@ struct MilestonesMonumentScreen: View {
             pageDots
                 .padding(.top, Spacing.md)
 
-            ZStack {
-                MilestoneGlow(material: moment.material, diameter: medalSize, strength: 0.24)
-                MedallionView(number: moment.id, material: moment.material, size: medalSize, litTicks: moment.id)
-            }
-            .frame(height: medalSize + Spacing.xl)
+            // The glow sits in a background so its 1.8x pool never widens the layout.
+            MedallionView(number: moment.id, material: moment.material, size: medalSize, litTicks: moment.id)
+                .background {
+                    MilestoneGlow(material: moment.material, diameter: medalSize, strength: 0.24)
+                }
+                .frame(maxWidth: .infinity)
+                .frame(height: medalSize + Spacing.xl)
             .padding(.top, Spacing.lg)
 
             VStack(spacing: Spacing.xs) {
