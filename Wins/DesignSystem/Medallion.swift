@@ -130,13 +130,13 @@ struct MedallionView: View {
 
             VStack(spacing: size * 0.02) {
                 Text("\(number)")
-                    .font(.system(size: size * 0.34, weight: .heavy).width(.expanded).monospacedDigit())
+                    .font(.system(size: size * 0.34, weight: .heavy).monospacedDigit())
                     .tracking(-size * 0.008)
                     .foregroundStyle(material.ink)
                     .shadow(color: material.engravingHighlight, radius: 0, x: 0, y: 1)
                 if let unit {
                     Text(unit)
-                        .font(.system(size: max(9, size * 0.075), weight: .semibold).width(.expanded))
+                        .font(.system(size: max(9, size * 0.075), weight: .semibold))
                         .foregroundStyle(material.ink.opacity(0.8))
                         .shadow(color: material.engravingHighlight, radius: 0, x: 0, y: 1)
                 }
@@ -170,7 +170,7 @@ struct MedallionView: View {
             Circle()
                 .strokeBorder(Theme.separator, lineWidth: 1)
             Text("\(number)")
-                .font(.system(size: size * 0.34, weight: .heavy).width(.expanded).monospacedDigit())
+                .font(.system(size: size * 0.34, weight: .heavy).monospacedDigit())
                 .foregroundStyle(Theme.textTertiary)
         }
     }

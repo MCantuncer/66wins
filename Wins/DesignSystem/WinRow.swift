@@ -114,7 +114,7 @@ struct WinList: View {
 
 // MARK: - Screen header
 //
-// Condensed eyebrow (date) above an SF Pro Expanded title of 1 to 3 words.
+// Eyebrow (date) above an SF Pro Display Large Title of 1 to 3 words.
 
 struct ScreenHeader: View {
     let eyebrow: String

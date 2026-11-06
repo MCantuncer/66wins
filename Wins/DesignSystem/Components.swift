@@ -55,7 +55,7 @@ struct Pill: View {
 
 // MARK: - Section header
 //
-// Sentence case, SF Pro Condensed eyebrow, secondary color. Never ALL CAPS.
+// Sentence case, SF Pro Semibold eyebrow, secondary color. Never ALL CAPS.
 
 struct SectionHeader<Trailing: View>: View {
     let title: String
