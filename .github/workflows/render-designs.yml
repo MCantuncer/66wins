@@ -1,0 +1,23 @@
+name: Render designs
+
+on:
+  push:
+    branches: ["design/**"]
+  workflow_dispatch:
+
+jobs:
+  render:
+    runs-on: macos-26
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - name: Show Xcode
+        run: xcodebuild -version && xcrun simctl list devices available | grep iPhone | head -20
+      - name: Render screens
+        run: scripts/render.sh renders
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: renders
+          path: renders/
+          if-no-files-found: warn
