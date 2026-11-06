@@ -74,6 +74,8 @@ struct BadgesScreen: View {
                 .padding(.bottom, Spacing.xl)
             }
             .scrollIndicators(.hidden)
+            // Medal shadows extend past the margin; don't let the scroll view crop them.
+            .scrollClipDisabled()
         }
         .padding(.horizontal, Layout.margin)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
