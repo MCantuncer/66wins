@@ -117,12 +117,6 @@ struct DayGrid: View {
                     }
                 }
                 .clipShape(shape)
-                if level >= 1 {
-                    // a won day: every topic done
-                    Circle().fill(DayGrid.wonGold)
-                        .frame(width: 10, height: 10)
-                        .shadow(color: DayGrid.wonGold.opacity(0.5), radius: 3)
-                }
                 if rec.rescued {
                     Image(systemName: "lifepreserver.fill")
                         .font(.system(size: 11, weight: .semibold))
@@ -135,6 +129,15 @@ struct DayGrid: View {
                         .foregroundStyle(Theme.background, Theme.textPrimary)
                         .offset(x: cell / 2 - 3, y: -cell / 2 + 3)
                         .accessibilityLabel(m.name)
+                }
+            }
+            .overlay {
+                // a won day: every topic done, ringed in gold
+                if Self.level(day: day, rescued: rec.rescued) >= 1 && day != today {
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .strokeBorder(DayGrid.wonGold, lineWidth: 2)
+                        .padding(-2.5)
+                        .shadow(color: DayGrid.wonGold.opacity(0.45), radius: 4)
                 }
             }
             .overlay {
@@ -168,11 +171,10 @@ struct DayGridLegend: View {
     var body: some View {
         HStack(spacing: Spacing.md) {
             HStack(spacing: Spacing.xxs) {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 3).fill(Theme.textPrimary)
-                    Circle().fill(DayGrid.wonGold).frame(width: 5, height: 5)
-                }
-                .frame(width: 12, height: 12)
+                RoundedRectangle(cornerRadius: 3).fill(Theme.textPrimary)
+                    .frame(width: 10, height: 10)
+                    .padding(1.5)
+                    .overlay(RoundedRectangle(cornerRadius: 4).strokeBorder(DayGrid.wonGold, lineWidth: 1.5))
                 Text("Won day").textStyle(.caption).foregroundStyle(Theme.textSecondary)
             }
             swatch(level: 0.5, color: Theme.textPrimary, "Half")
