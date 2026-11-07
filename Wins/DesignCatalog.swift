@@ -19,6 +19,8 @@ enum DesignCatalog {
         Entry(id: "night-check", title: "Night check") { AnyView(NightCheckInstrumentScreen()) },
         Entry(id: "missed-day", title: "Missed day") { AnyView(MissedDayInstrumentScreen()) },
         Entry(id: "badge-earned", title: "Badge earned") { AnyView(BadgeEarnedInstrumentScreen()) },
+        Entry(id: "progress-habits", title: "Progress: habit rows") { AnyView(BadgeEarnedInstrumentScreen(progress: .habits)) },
+        Entry(id: "progress-thennow", title: "Progress: then vs now") { AnyView(BadgeEarnedInstrumentScreen(progress: .thenNow)) },
         Entry(id: "badges", title: "Milestones") { AnyView(MilestonesInstrumentScreen()) },
     ]
 

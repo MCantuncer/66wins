@@ -319,6 +319,7 @@ struct MissedDayInstrumentScreen: View {
 
 /// Day 21. The run as a watch face with the new medal at its centre.
 struct BadgeEarnedInstrumentScreen: View {
+    var progress: BadgeProgressStyle = .grid
     private let moment = MilestoneStory.latest
 
     var body: some View {
@@ -329,19 +330,9 @@ struct BadgeEarnedInstrumentScreen: View {
 
             ScrollView {
                 VStack(spacing: 0) {
-                    HStack(alignment: .firstTextBaseline, spacing: Spacing.xs) {
-                        Text("\(moment.id)")
-                            .textStyle(.numeralHero)
-                            .foregroundStyle(Theme.textPrimary)
-                        Text("of 66 days")
-                            .textStyle(.headline)
-                            .foregroundStyle(Theme.textSecondary)
-                    }
-                    .padding(.top, Spacing.md)
-                    DayGrid(records: DayRecords.sample(days: moment.id))
+                    BadgeProgressView(style: progress, day: moment.id)
                         .padding(.top, Spacing.md)
-                    DayGridLegend()
-                        .padding(.top, Spacing.sm)
+                        .padding(.bottom, Spacing.xs)
 
                     HStack(spacing: Spacing.xs) {
                         PurposeBadge(purpose: moment.rewards)
