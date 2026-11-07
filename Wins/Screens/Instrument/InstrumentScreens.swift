@@ -329,10 +329,19 @@ struct BadgeEarnedInstrumentScreen: View {
 
             ScrollView {
                 VStack(spacing: 0) {
-                    DayRingsBadge(records: DayRecords.sample(days: moment.id), size: 250)
-                        .padding(.top, Spacing.xs)
-                    DayRingsLegend()
-                        .padding(.top, Spacing.xxs)
+                    HStack(alignment: .firstTextBaseline, spacing: Spacing.xs) {
+                        Text("\(moment.id)")
+                            .textStyle(.numeralHero)
+                            .foregroundStyle(Theme.textPrimary)
+                        Text("of 66 days")
+                            .textStyle(.headline)
+                            .foregroundStyle(Theme.textSecondary)
+                    }
+                    .padding(.top, Spacing.md)
+                    DayGrid(records: DayRecords.sample(days: moment.id))
+                        .padding(.top, Spacing.md)
+                    DayGridLegend()
+                        .padding(.top, Spacing.sm)
 
                     HStack(spacing: Spacing.xs) {
                         PurposeBadge(purpose: moment.rewards)
