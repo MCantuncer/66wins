@@ -10,6 +10,8 @@ struct DayRecord {
     struct Arc { let start: Double; let duration: Double }
     let arcs: [Arc]
     let rescued: Bool
+    /// Share of the day won (0...1). Real data sets it; sample data leaves it nil.
+    var level: Double? = nil
 }
 
 enum DayRecords {

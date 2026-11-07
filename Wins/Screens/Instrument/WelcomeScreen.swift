@@ -8,6 +8,11 @@ import AuthenticationServices
 // The real build uses the official Google button asset from the GoogleSignIn SDK; the "G" here is a stand-in.
 
 struct WelcomeInstrumentScreen: View {
+    var onApple: (Result<ASAuthorization, Error>) -> Void = { _ in }
+    var onGoogle: () -> Void = {}
+    /// Debug builds only: continue without an account while sign-in is being set up.
+    var onSkip: (() -> Void)? = nil
+    var message: String? = nil
 
     var body: some View {
         VStack(spacing: 0) {
@@ -45,12 +50,12 @@ struct WelcomeInstrumentScreen: View {
             Spacer(minLength: Spacing.lg)
 
             VStack(spacing: Spacing.sm) {
-                SignInWithAppleButton(.continue, onRequest: { _ in }, onCompletion: { _ in })
+                SignInWithAppleButton(.continue, onRequest: { $0.requestedScopes = [.fullName] }, onCompletion: onApple)
                     .signInWithAppleButtonStyle(DesignCatalog.colorScheme == .light ? .black : .white)
                     .frame(height: Layout.primaryHeight)
                     .clipShape(Capsule())
 
-                Button {} label: {
+                Button(action: onGoogle) {
                     HStack(spacing: Spacing.xs) {
                         GoogleMark()
                         Text("Continue with Google")
@@ -62,6 +67,17 @@ struct WelcomeInstrumentScreen: View {
                 .buttonBorderShape(.capsule)
                 .tint(Theme.textPrimary)
 
+                if let message {
+                    Text(message)
+                        .textStyle(.caption)
+                        .foregroundStyle(Theme.textSecondary)
+                        .multilineTextAlignment(.center)
+                }
+                if let onSkip {
+                    Button("Continue without an account", action: onSkip)
+                        .textStyle(.meta)
+                        .foregroundStyle(Theme.textSecondary)
+                }
                 Text("By continuing you agree to the Terms and Privacy Policy.")
                     .textStyle(.caption)
                     .foregroundStyle(Theme.textTertiary)

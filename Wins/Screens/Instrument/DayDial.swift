@@ -18,6 +18,8 @@ struct DayDial<Center: View>: View {
     /// Optional "now" hand, in hours.
     var nowHour: Double? = nil
     var showsBadges: Bool = true
+    var wake: Double = TonightStory.wake
+    var sleep: Double = TonightStory.sleep
     let center: Center
 
     init(wins: [TonightWin],
@@ -26,7 +28,11 @@ struct DayDial<Center: View>: View {
          states: [Int: DialSegmentState] = [:],
          nowHour: Double? = nil,
          showsBadges: Bool = true,
+         wake: Double = TonightStory.wake,
+         sleep: Double = TonightStory.sleep,
          @ViewBuilder center: () -> Center) {
+        self.wake = wake
+        self.sleep = sleep
         self.wins = wins
         self.size = size
         self.lineWidth = lineWidth
@@ -43,7 +49,7 @@ struct DayDial<Center: View>: View {
                 .stroke(Theme.markTrack, lineWidth: lineWidth)
                 .frame(width: size, height: size)
             Circle()
-                .trim(from: fraction(TonightStory.wake), to: fraction(TonightStory.sleep))
+                .trim(from: fraction(wake), to: fraction(sleep))
                 .stroke(Theme.markMuted, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
                 .rotationEffect(.degrees(-90))
                 .frame(width: size, height: size)

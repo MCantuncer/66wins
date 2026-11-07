@@ -107,7 +107,7 @@ struct DayGrid: View {
             ZStack {
                 shape.fill(Theme.surfaceRaised)
                 // the day fills from the bottom by how much of it you won
-                let level = Self.level(day: day, rescued: rec.rescued)
+                let level = rec.level ?? Self.level(day: day, rescued: rec.rescued)
                 GeometryReader { g in
                     VStack(spacing: 0) {
                         Spacer(minLength: 0)
@@ -126,7 +126,7 @@ struct DayGrid: View {
             }
             .overlay {
                 // a won day: every topic done, ringed in gold
-                if Self.level(day: day, rescued: rec.rescued) >= 1 && day != today {
+                if (rec.level ?? Self.level(day: day, rescued: rec.rescued)) >= 1 && day != today {
                     RoundedRectangle(cornerRadius: 10, style: .continuous)
                         .strokeBorder(DayGrid.wonGold, lineWidth: 2)
                         .padding(-2.5)
