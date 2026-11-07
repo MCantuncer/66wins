@@ -18,6 +18,12 @@ struct BadgeProgressView: View {
                 }
                 DayGrid(records: DayRecords.sample(days: day))
                 DayGridLegend()
+                HStack(spacing: Spacing.xs) {
+                    PurposeBadge(purpose: MilestoneStory.next.rewards, size: 18)
+                    Text("\(MilestoneStory.next.id - day) days to \(MilestoneStory.next.name)")
+                        .textStyle(.meta)
+                        .foregroundStyle(Theme.textSecondary)
+                }
             }
         case .habits:
             HabitRows(records: DayRecords.sample(days: day))

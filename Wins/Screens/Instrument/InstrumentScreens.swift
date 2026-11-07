@@ -359,16 +359,6 @@ struct BadgeEarnedInstrumentScreen: View {
                     }
                     .padding(.top, Spacing.xl)
 
-                    HStack(spacing: Spacing.xs) {
-                        PurposeBadge(purpose: MilestoneStory.next.rewards, size: 18)
-                        Text("\(MilestoneStory.daysToNext) days to \(MilestoneStory.next.name)")
-                            .textStyle(.meta)
-                            .foregroundStyle(Theme.textSecondary)
-                        Spacer(minLength: 0)
-                    }
-                    .padding(.top, Spacing.lg)
-                    ProgressLine(value: MilestoneStory.progressToNext, fill: Theme.accent)
-                        .padding(.top, Spacing.xs)
                 }
                 .padding(.horizontal, Layout.margin)
                 .padding(.bottom, Spacing.lg)
