@@ -8,7 +8,6 @@ import AuthenticationServices
 // The real build uses the official Google button asset from the GoogleSignIn SDK; the "G" here is a stand-in.
 
 struct WelcomeInstrumentScreen: View {
-    @Environment(\.colorScheme) private var scheme
 
     var body: some View {
         VStack(spacing: 0) {
@@ -47,7 +46,7 @@ struct WelcomeInstrumentScreen: View {
 
             VStack(spacing: Spacing.sm) {
                 SignInWithAppleButton(.continue, onRequest: { _ in }, onCompletion: { _ in })
-                    .signInWithAppleButtonStyle(scheme == .dark ? .white : .black)
+                    .signInWithAppleButtonStyle(DesignCatalog.colorScheme == .light ? .black : .white)
                     .frame(height: Layout.primaryHeight)
                     .clipShape(Capsule())
 
