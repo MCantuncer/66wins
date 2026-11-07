@@ -320,7 +320,6 @@ struct MissedDayInstrumentScreen: View {
 /// Day 21. The run as a watch face with the new medal at its centre.
 struct BadgeEarnedInstrumentScreen: View {
     private let moment = MilestoneStory.latest
-    private let dial: CGFloat = 300
 
     var body: some View {
         VStack(spacing: 0) {
@@ -330,19 +329,10 @@ struct BadgeEarnedInstrumentScreen: View {
 
             ScrollView {
                 VStack(spacing: 0) {
-                    ZStack {
-                        ForEach(1...66, id: \.self) { day in
-                            Capsule()
-                                .fill(day <= moment.id ? Theme.textPrimary : Theme.markMuted)
-                                .frame(width: day == moment.id ? 2.5 : 1.5, height: day == moment.id ? 18 : 10)
-                                .offset(y: -dial / 2 + (day == moment.id ? 9 : 5))
-                                .rotationEffect(.degrees(Double(day - 1) / 66.0 * 360.0))
-                        }
-                        MilestoneGlow(material: moment.material, diameter: 190, strength: 0.4)
-                        MedallionView(number: moment.id, unit: "days", material: moment.material, size: 190)
-                    }
-                    .frame(width: dial + 24, height: dial + 24)
-                    .padding(.top, Spacing.md)
+                    DayRingsBadge(records: DayRecords.sample(days: moment.id), size: 290)
+                        .padding(.top, Spacing.xs)
+                    DayRingsLegend()
+                        .padding(.top, Spacing.xxs)
 
                     HStack(spacing: Spacing.xs) {
                         PurposeBadge(purpose: moment.rewards)
