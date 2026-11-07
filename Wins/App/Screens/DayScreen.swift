@@ -85,38 +85,7 @@ struct DayScreen: View {
     }
 
     private func focus(_ b: Block) -> some View {
-        VStack(alignment: .leading, spacing: Spacing.sm) {
-            Button { editing = b } label: {
-                HStack(spacing: Spacing.md) {
-                    BadgedIcon(systemImage: b.topic.symbol, purpose: b.topic.purpose, size: 44)
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(b.title).textStyle(.headline).foregroundStyle(Theme.textPrimary)
-                        Text("\(DayKey.timeText(b.start)) · \(Int((b.duration * 60).rounded())) min")
-                            .textStyle(.caption).foregroundStyle(Theme.textSecondary)
-                    }
-                    Spacer()
-                }
-            }
-            .buttonStyle(.plain)
-
-            ForEach(Array(b.steps.enumerated()), id: \.offset) { i, s in
-                Button { b.toggleStep(i) } label: {
-                    HStack(spacing: Spacing.sm) {
-                        Image(systemName: b.isStepDone(i) ? "checkmark.circle.fill" : "circle")
-                            .foregroundStyle(b.isStepDone(i) ? Theme.accent : Theme.textTertiary)
-                        Text(s).textStyle(.body).foregroundStyle(Theme.textPrimary)
-                            .strikethrough(b.isStepDone(i))
-                        Spacer()
-                    }
-                    .frame(minHeight: 36)
-                    .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                .sensoryFeedback(.selection, trigger: b.isStepDone(i))
-            }
-        }
-        .padding(Spacing.md)
-        .background(Theme.surfaceRaised, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+        FocusCard(block: b, hourNow: hourNow, onOpen: { editing = b })
     }
 
     private func countdown(to b: Block) -> String {
