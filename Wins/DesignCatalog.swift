@@ -12,8 +12,32 @@ enum DesignCatalog {
 
     /// Register every design screen here.
     static let entries: [Entry] = [
-        // Entry(id: "evening-plan", title: "Tonight") { AnyView(EveningPlanScreen()) },
-        Entry(id: "pipeline-check", title: "Pipeline check") { AnyView(PipelineCheckScreen()) },
+        // The real app on seeded data (MVP).
+        Entry(id: "app-welcome", title: "App: Welcome") { AnyView(DemoHost(.welcome)) },
+        Entry(id: "app-rhythm", title: "App: Your rhythm") { AnyView(DemoHost(.rhythm)) },
+        Entry(id: "app-reason", title: "App: Your reason") { AnyView(DemoHost(.reason)) },
+        Entry(id: "app-topics", title: "App: Topics") { AnyView(DemoHost(.topics)) },
+        Entry(id: "app-plan", title: "App: Tonight") { AnyView(DemoHost(.plan)) },
+        Entry(id: "app-set", title: "App: Tomorrow is set") { AnyView(DemoHost(.set)) },
+        Entry(id: "app-day", title: "App: The day") { AnyView(DemoHost(.day)) },
+        Entry(id: "app-focus-compare", title: "App: Step card variants") { AnyView(FocusCompare()) },
+        Entry(id: "app-day-deck", title: "App: The day (deck)") { AnyView(DemoHost(.day, focus: .deck)) },
+        Entry(id: "app-day-ring", title: "App: The day (ring)") { AnyView(DemoHost(.day, focus: .ring)) },
+        Entry(id: "app-day-rail", title: "App: The day (rail)") { AnyView(DemoHost(.day, focus: .rail)) },
+        Entry(id: "app-check", title: "App: Night check") { AnyView(DemoHost(.check)) },
+        Entry(id: "app-rescue", title: "App: Rescue") { AnyView(DemoHost(.rescue)) },
+        Entry(id: "app-progress", title: "App: 66 days") { AnyView(DemoHost(.progress)) },
+        // Chosen direction: "Instrument".
+        Entry(id: "welcome", title: "Welcome") { AnyView(WelcomeInstrumentScreen()) },
+        Entry(id: "evening-plan", title: "Tonight") { AnyView(TonightInstrumentScreen()) },
+        Entry(id: "tomorrow-set", title: "Tomorrow is set") { AnyView(TomorrowSetInstrumentScreen()) },
+        Entry(id: "morning-open", title: "Morning") { AnyView(MorningOpenInstrumentScreen()) },
+        Entry(id: "night-check", title: "Night check") { AnyView(NightCheckInstrumentScreen()) },
+        Entry(id: "missed-day", title: "Missed day") { AnyView(MissedDayInstrumentScreen()) },
+        Entry(id: "badge-earned", title: "Badge earned") { AnyView(BadgeEarnedInstrumentScreen()) },
+        Entry(id: "progress-habits", title: "Progress: habit rows") { AnyView(BadgeEarnedInstrumentScreen(progress: .habits)) },
+        Entry(id: "progress-thennow", title: "Progress: then vs now") { AnyView(BadgeEarnedInstrumentScreen(progress: .thenNow)) },
+        Entry(id: "badges", title: "Milestones") { AnyView(MilestonesInstrumentScreen()) },
     ]
 
     static var requestedID: String? {

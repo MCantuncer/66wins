@@ -22,13 +22,33 @@ APP=$(find build/Build/Products -name "66wins.app" -path "*iphonesimulator*" | h
 xcrun simctl install "$DEVICE" "$APP"
 
 IDS=$(grep -vE '^\s*//' Wins/DesignCatalog.swift | grep -oE 'Entry\(id: "[^"]+"' | sed -E 's/.*"([^"]+)"/\1/')
+# Optional: ONLY=app- renders just the ids starting with that prefix.
+if [ -n "${ONLY:-}" ]; then IDS=$(echo "$IDS" | grep "^${ONLY}" || true); fi
 for id in $IDS; do
   for mode in dark light; do
-    xcrun simctl terminate "$DEVICE" "$BUNDLE" 2>/dev/null || true
-    if [ "$mode" = light ]; then xcrun simctl launch "$DEVICE" "$BUNDLE" -screen "$id" -light >/dev/null
-    else xcrun simctl launch "$DEVICE" "$BUNDLE" -screen "$id" >/dev/null; fi
-    sleep 2.5
-    xcrun simctl io "$DEVICE" screenshot "$OUT/$id-$mode.png" >/dev/null
+    for launch in 1 2 3; do
+      xcrun simctl terminate "$DEVICE" "$BUNDLE" 2>/dev/null || true
+      if [ "$mode" = light ]; then xcrun simctl launch "$DEVICE" "$BUNDLE" -screen "$id" -light >/dev/null
+      else xcrun simctl launch "$DEVICE" "$BUNDLE" -screen "$id" >/dev/null; fi
+      # An undrawn app gives an all-black frame that compresses to a tiny PNG.
+      sleep 4
+      SIZE=0
+      for attempt in 1 2 3 4; do
+        xcrun simctl io "$DEVICE" screenshot "$OUT/$id-$mode.png" >/dev/null
+        SIZE=$(stat -f%z "$OUT/$id-$mode.png" 2>/dev/null || stat -c%s "$OUT/$id-$mode.png")
+        [ "$SIZE" -gt 120000 ] && break
+        sleep 2
+      done
+      if [ "$SIZE" -gt 120000 ]; then
+        # Let springs and fades settle, then take the final frame (keep it only if not blank).
+        sleep 1
+        xcrun simctl io "$DEVICE" screenshot "$OUT/tmp.png" >/dev/null
+        TSIZE=$(stat -f%z "$OUT/tmp.png" 2>/dev/null || stat -c%s "$OUT/tmp.png")
+        if [ "$TSIZE" -gt 120000 ]; then mv "$OUT/tmp.png" "$OUT/$id-$mode.png"; else rm -f "$OUT/tmp.png"; fi
+        break
+      fi
+      echo "  $id-$mode blank after launch $launch, relaunching"
+    done
     echo "rendered $OUT/$id-$mode.png"
   done
 done
