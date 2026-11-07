@@ -13,6 +13,7 @@ struct WelcomeInstrumentScreen: View {
     /// Debug builds only: continue without an account while sign-in is being set up.
     var onSkip: (() -> Void)? = nil
     var message: String? = nil
+    @State private var apple = AppleSignInCoordinator()
 
     var body: some View {
         VStack(spacing: 0) {
@@ -50,22 +51,14 @@ struct WelcomeInstrumentScreen: View {
             Spacer(minLength: Spacing.lg)
 
             VStack(spacing: Spacing.sm) {
-                SignInWithAppleButton(.continue, onRequest: { $0.requestedScopes = [.fullName] }, onCompletion: onApple)
-                    .signInWithAppleButtonStyle(DesignCatalog.colorScheme == .light ? .black : .white)
-                    .frame(height: Layout.primaryHeight)
-                    .clipShape(Capsule())
-
-                Button(action: onGoogle) {
-                    HStack(spacing: Spacing.xs) {
-                        GoogleMark()
-                        Text("Continue with Google")
-                    }
-                    .textStyle(.button)
-                    .frame(maxWidth: .infinity, minHeight: Layout.primaryHeight)
+                SSOButton(title: "Continue with Apple", action: { apple.start(onApple) }) {
+                    Image(systemName: "apple.logo")
+                        .font(.system(size: 19, weight: .medium))
+                        .offset(y: -1)
                 }
-                .buttonStyle(.glass)
-                .buttonBorderShape(.capsule)
-                .tint(Theme.textPrimary)
+                SSOButton(title: "Continue with Google", action: onGoogle) {
+                    GoogleMark()
+                }
 
                 if let message {
                     Text(message)
@@ -92,12 +85,72 @@ struct WelcomeInstrumentScreen: View {
     }
 }
 
+/// One style for every sign-in option: same fill, font, height and icon position.
+/// The icon sits at a fixed inset on the left; the title is centred on the button.
+struct SSOButton<Icon: View>: View {
+    let title: String
+    let action: () -> Void
+    @ViewBuilder let icon: () -> Icon
+
+    var body: some View {
+        Button(action: action) {
+            ZStack {
+                Text(title)
+                    .textStyle(.button)
+                    .frame(maxWidth: .infinity)
+                HStack {
+                    icon().frame(width: 22, height: 22)
+                    Spacer()
+                }
+                .padding(.leading, 22)
+            }
+            .foregroundStyle(Theme.background)
+            .frame(maxWidth: .infinity, minHeight: Layout.primaryHeight)
+            .background(Theme.textPrimary, in: Capsule())
+            .contentShape(Capsule())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(title)
+    }
+}
+
+/// Runs Sign in with Apple from a custom button.
+final class AppleSignInCoordinator: NSObject, ASAuthorizationControllerDelegate,
+                                    ASAuthorizationControllerPresentationContextProviding {
+    private var completion: (Result<ASAuthorization, Error>) -> Void = { _ in }
+
+    func start(_ completion: @escaping (Result<ASAuthorization, Error>) -> Void) {
+        self.completion = completion
+        let request = ASAuthorizationAppleIDProvider().createRequest()
+        request.requestedScopes = [.fullName]
+        let controller = ASAuthorizationController(authorizationRequests: [request])
+        controller.delegate = self
+        controller.presentationContextProvider = self
+        controller.performRequests()
+    }
+
+    func authorizationController(controller: ASAuthorizationController,
+                                 didCompleteWithAuthorization authorization: ASAuthorization) {
+        completion(.success(authorization))
+    }
+
+    func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
+        completion(.failure(error))
+    }
+
+    func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
+        UIApplication.shared.connectedScenes
+            .compactMap { ($0 as? UIWindowScene)?.keyWindow }
+            .first ?? ASPresentationAnchor()
+    }
+}
+
 /// Stand-in for Google's official "G" mark (replaced by the SDK asset in the real build).
 private struct GoogleMark: View {
     var body: some View {
         ZStack {
             Circle().fill(Color.white)
-            Text("G").font(.system(size: 13, weight: .bold)).foregroundStyle(Color(red: 0.26, green: 0.52, blue: 0.96))
+            Text("G").font(.system(size: 14, weight: .bold)).foregroundStyle(Color(red: 0.26, green: 0.52, blue: 0.96))
         }
         .frame(width: 22, height: 22)
         .accessibilityHidden(true)
