@@ -9,7 +9,7 @@ import SwiftUI
 enum FocusStyle: String { case card, deck, ring, rail }
 
 extension EnvironmentValues {
-    @Entry var focusStyle: FocusStyle = .card
+    @Entry var focusStyle: FocusStyle = .ring
 }
 
 struct FocusCard: View {
@@ -52,32 +52,72 @@ struct FocusCard: View {
 
     private var header: some View {
         Button(action: onOpen) {
-            HStack(spacing: Spacing.md) {
-                BadgedIcon(systemImage: block.topic.symbol, purpose: block.topic.purpose, size: 44)
+            HStack(alignment: .center, spacing: Spacing.md) {
+                Image(systemName: block.topic.symbol)
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundStyle(tint)
+                    .frame(width: 44, height: 44)
+                    .background(tint.opacity(0.14), in: RoundedRectangle(cornerRadius: 13, style: .continuous))
+                    .accessibilityLabel(block.topic.purpose.label)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(block.title)
                         .textStyle(.headline)
                         .foregroundStyle(Theme.textPrimary)
+                        .lineLimit(1)
                     Text("\(DayKey.timeText(block.start))–\(DayKey.timeText(block.start + block.duration))")
                         .textStyle(.caption)
                         .monospacedDigit()
                         .foregroundStyle(Theme.textSecondary)
                 }
                 Spacer(minLength: Spacing.xs)
-                Pill(text: timeLeft, systemImage: "hourglass", style: .quiet)
+                VStack(alignment: .trailing, spacing: 0) {
+                    Text(timeLeftValue)
+                        .font(.system(size: 22, weight: .semibold))
+                        .monospacedDigit()
+                        .foregroundStyle(Theme.textPrimary)
+                    Text(timeLeftUnit)
+                        .textStyle(.caption)
+                        .foregroundStyle(Theme.textTertiary)
+                }
+                .fixedSize()
             }
         }
         .buttonStyle(.plain)
     }
 
-    private var timeLeft: String {
-        let end = block.start + block.duration
-        if hourNow < block.start {
-            return "in \(Int(((block.start - hourNow) * 60).rounded())) min"
+    private var tint: Color { block.topic.purpose.tint }
+
+    /// Remaining minutes in the block, or minutes until it starts.
+    private var minutesLeft: Int {
+        if hourNow < block.start { return Int(((block.start - hourNow) * 60).rounded()) }
+        return max(0, Int(((block.start + block.duration - hourNow) * 60).rounded()))
+    }
+
+    private var timeLeftValue: String {
+        let m = minutesLeft
+        return m >= 60 ? String(format: "%d:%02d", m / 60, m % 60) : "\(m)"
+    }
+
+    private var timeLeftUnit: String {
+        if hourNow < block.start { return minutesLeft >= 60 ? "until start" : "min to start" }
+        if minutesLeft == 0 { return "over time" }
+        return minutesLeft >= 60 ? "left" : "min left"
+    }
+
+    /// The block as a bar of time: the bright part is what is left, and it shrinks as the day moves.
+    private var timeBar: some View {
+        let elapsed = min(max((hourNow - block.start) / max(block.duration, 0.01), 0), 1)
+        return GeometryReader { geo in
+            let w = geo.size.width
+            ZStack(alignment: .leading) {
+                Capsule().fill(Theme.markTrack)
+                Capsule().fill(tint)
+                    .frame(width: max(w * (1 - elapsed), 4))
+                    .offset(x: w * elapsed)
+            }
         }
-        let left = Int(((end - hourNow) * 60).rounded())
-        if left <= 0 { return "Over time" }
-        return left >= 60 ? String(format: "%d:%02d left", left / 60, left % 60) : "\(left) min left"
+        .frame(height: 4)
+        .accessibilityHidden(true)
     }
 
     // MARK: segmented progress
@@ -200,40 +240,73 @@ struct FocusCard: View {
 
     @ViewBuilder
     private var ring: some View {
+        timeBar
         if let i = current {
-            HStack(spacing: Spacing.lg) {
-                Button { finish(i) } label: {
-                    ZStack {
-                        Circle().stroke(Theme.markTrack, lineWidth: 6)
-                        Circle()
-                            .trim(from: 0, to: CGFloat(doneCount) / CGFloat(max(block.steps.count, 1)))
-                            .stroke(Theme.accent, style: StrokeStyle(lineWidth: 6, lineCap: .round))
-                            .rotationEffect(.degrees(-90))
-                        ForEach(block.steps.indices, id: \.self) { k in
-                            Capsule().fill(Theme.surfaceRaised).frame(width: 2.5, height: 8)
-                                .offset(y: -41)
-                                .rotationEffect(.degrees(Double(k) / Double(block.steps.count) * 360))
-                        }
-                        Image(systemName: "checkmark").font(.system(size: 26, weight: .bold)).foregroundStyle(Theme.textPrimary)
-                    }
-                    .frame(width: 82, height: 82)
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel("Finish \(block.steps[i])")
+            HStack(alignment: .center, spacing: Spacing.lg) {
+                Button { finish(i) } label: { stepRing }
+                    .buttonStyle(PressScale())
+                    .accessibilityLabel("Finish \(block.steps[i])")
 
-                VStack(alignment: .leading, spacing: Spacing.xxs) {
-                    Text("\(doneCount) of \(block.steps.count) done")
-                        .textStyle(.eyebrow).foregroundStyle(Theme.textSecondary)
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Step \(i + 1) of \(block.steps.count)")
+                        .textStyle(.eyebrow)
+                        .monospacedDigit()
+                        .foregroundStyle(Theme.textTertiary)
                     Text(block.steps[i])
-                        .textStyle(.reasonCompact).foregroundStyle(Theme.textPrimary)
+                        .textStyle(.reasonCompact)
+                        .foregroundStyle(Theme.textPrimary)
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.85)
                         .fixedSize(horizontal: false, vertical: true)
+                        .id(i)
+                        .transition(.asymmetric(insertion: .move(edge: .bottom).combined(with: .opacity),
+                                                removal: .opacity))
                     if i + 1 < block.steps.count {
-                        Text("Then \(block.steps[i + 1])").textStyle(.caption).foregroundStyle(Theme.textTertiary).lineLimit(1)
+                        HStack(spacing: 6) {
+                            Image(systemName: "arrow.turn.down.right")
+                                .font(.system(size: 11, weight: .semibold))
+                                .foregroundStyle(Theme.textTertiary)
+                            Text(block.steps[i + 1])
+                                .textStyle(.caption)
+                                .foregroundStyle(Theme.textSecondary)
+                                .lineLimit(1)
+                        }
                     }
                 }
-                Spacer(minLength: 0)
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
+            .padding(.top, Spacing.xs)
         } else { allDone }
+    }
+
+    /// One arc per step around a solid check. Done arcs fill green, the current one is lit, the rest wait.
+    private var stepRing: some View {
+        let n = max(block.steps.count, 1)
+        let gap = n > 1 ? 0.035 : 0
+        return ZStack {
+            ForEach(0..<n, id: \.self) { k in
+                let from = Double(k) / Double(n) + gap / 2
+                let to = Double(k + 1) / Double(n) - gap / 2
+                Circle()
+                    .trim(from: from, to: to)
+                    .stroke(arcColor(k), style: StrokeStyle(lineWidth: 5, lineCap: .round))
+                    .rotationEffect(.degrees(-90))
+            }
+            Circle()
+                .fill(Theme.textPrimary)
+                .padding(11)
+            Image(systemName: "checkmark")
+                .font(.system(size: 24, weight: .bold))
+                .foregroundStyle(Theme.surfaceRaised)
+        }
+        .frame(width: 80, height: 80)
+        .animation(.snappy, value: doneCount)
+    }
+
+    private func arcColor(_ k: Int) -> Color {
+        if block.isStepDone(k) { return Theme.accent }
+        if k == current { return Theme.textPrimary.opacity(0.55) }
+        return Theme.markTrack
     }
 
     // MARK: - Variant C: a transit line through the steps
@@ -280,6 +353,14 @@ struct FocusCard: View {
                 }
                 .frame(height: isCurrent ? 64 : 44)
             }
+        }
+    }
+
+    private struct PressScale: ButtonStyle {
+        func makeBody(configuration: Configuration) -> some View {
+            configuration.label
+                .scaleEffect(configuration.isPressed ? 0.92 : 1)
+                .animation(.snappy(duration: 0.18), value: configuration.isPressed)
         }
     }
 
