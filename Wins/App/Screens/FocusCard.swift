@@ -73,11 +73,11 @@ struct FocusCard: View {
     private var timeLeft: String {
         let end = block.start + block.duration
         if hourNow < block.start {
-            return "\(Int(((block.start - hourNow) * 60).rounded())) min to go"
+            return "in \(Int(((block.start - hourNow) * 60).rounded())) min"
         }
         let left = Int(((end - hourNow) * 60).rounded())
         if left <= 0 { return "Over time" }
-        return left >= 60 ? "\(left / 60) h \(left % 60) min left" : "\(left) min left"
+        return left >= 60 ? String(format: "%d:%02d left", left / 60, left % 60) : "\(left) min left"
     }
 
     // MARK: segmented progress
