@@ -4,6 +4,11 @@ on:
   push:
     branches: ["design/**"]
   workflow_dispatch:
+    inputs:
+      only:
+        description: "Render only ids starting with this prefix (e.g. app-)"
+        required: false
+        default: ""
 
 permissions:
   contents: write
@@ -21,6 +26,8 @@ jobs:
       - name: Show Xcode
         run: xcodebuild -version && xcrun simctl list devices available | grep iPhone | head -20
       - name: Render screens
+        env:
+          ONLY: ${{ github.event.inputs.only }}
         run: scripts/render.sh renders
       - uses: actions/upload-artifact@v4
         if: always()

@@ -22,6 +22,8 @@ APP=$(find build/Build/Products -name "66wins.app" -path "*iphonesimulator*" | h
 xcrun simctl install "$DEVICE" "$APP"
 
 IDS=$(grep -vE '^\s*//' Wins/DesignCatalog.swift | grep -oE 'Entry\(id: "[^"]+"' | sed -E 's/.*"([^"]+)"/\1/')
+# Optional: ONLY=app- renders just the ids starting with that prefix.
+if [ -n "${ONLY:-}" ]; then IDS=$(echo "$IDS" | grep "^${ONLY}" || true); fi
 for id in $IDS; do
   for mode in dark light; do
     for launch in 1 2 3; do

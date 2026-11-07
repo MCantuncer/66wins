@@ -12,6 +12,10 @@ struct RootView: View {
     @Query private var profiles: [Profile]
     @Query(sort: \Plan.dayKey) private var plans: [Plan]
 
+    /// Fixed clock for design renders; nil in the real app.
+    var fixedNow: Date? = nil
+    var openProgress = false
+
     @State private var now = Date.now
     @State private var showProgress = false
     @State private var showSettings = false
@@ -35,8 +39,12 @@ struct RootView: View {
                 OnboardingFlow(profile: profiles.first)
             }
         }
-        .onReceive(timer) { now = $0 }
-        .onChange(of: phase) { _, p in if p == .active { now = .now } }
+        .onAppear {
+            if let fixedNow { now = fixedNow }
+            if openProgress { showProgress = true }
+        }
+        .onReceive(timer) { if fixedNow == nil { now = $0 } }
+        .onChange(of: phase) { _, p in if p == .active && fixedNow == nil { now = .now } }
     }
 
     private enum Route { case plan(Plan), set(Plan), day(Plan), check(Plan), needsDraft(String) }

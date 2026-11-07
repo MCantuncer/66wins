@@ -12,6 +12,17 @@ enum DesignCatalog {
 
     /// Register every design screen here.
     static let entries: [Entry] = [
+        // The real app on seeded data (MVP).
+        Entry(id: "app-welcome", title: "App: Welcome") { AnyView(DemoHost(.welcome)) },
+        Entry(id: "app-rhythm", title: "App: Your rhythm") { AnyView(DemoHost(.rhythm)) },
+        Entry(id: "app-reason", title: "App: Your reason") { AnyView(DemoHost(.reason)) },
+        Entry(id: "app-topics", title: "App: Topics") { AnyView(DemoHost(.topics)) },
+        Entry(id: "app-plan", title: "App: Tonight") { AnyView(DemoHost(.plan)) },
+        Entry(id: "app-set", title: "App: Tomorrow is set") { AnyView(DemoHost(.set)) },
+        Entry(id: "app-day", title: "App: The day") { AnyView(DemoHost(.day)) },
+        Entry(id: "app-check", title: "App: Night check") { AnyView(DemoHost(.check)) },
+        Entry(id: "app-rescue", title: "App: Rescue") { AnyView(DemoHost(.rescue)) },
+        Entry(id: "app-progress", title: "App: 66 days") { AnyView(DemoHost(.progress)) },
         // Chosen direction: "Instrument".
         Entry(id: "welcome", title: "Welcome") { AnyView(WelcomeInstrumentScreen()) },
         Entry(id: "evening-plan", title: "Tonight") { AnyView(TonightInstrumentScreen()) },
