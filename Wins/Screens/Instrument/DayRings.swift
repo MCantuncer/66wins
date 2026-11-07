@@ -36,7 +36,7 @@ struct DayRingsBadge: View {
         let inner = size * 0.17
         let outer = size * 0.47
         let step = (outer - inner) / CGFloat(max(records.count - 1, 1))
-        let line = max(step * 0.55, 1.5)
+        let line = max(step * 0.8, 2)
 
         ZStack {
             Canvas { ctx, canvas in
@@ -45,18 +45,15 @@ struct DayRingsBadge: View {
 
                 for (i, day) in records.enumerated() {
                     let r = inner + CGFloat(i) * step
-                    // the day itself: a faint full ring
-                    var track = Path()
-                    track.addArc(center: c, radius: r, startAngle: .zero, endAngle: .degrees(360), clockwise: false)
-                    ctx.stroke(track, with: .color(Theme.markTrack), lineWidth: line)
-
                     for a in day.arcs {
                         var p = Path()
-                        p.addArc(center: c, radius: r, startAngle: angle(a.start),
-                                 endAngle: angle(a.start + a.duration), clockwise: false)
+                        let shown = max(a.duration, 1.75)          // visual minimum length
+                        let mid = a.start + a.duration / 2
+                        p.addArc(center: c, radius: r, startAngle: angle(mid - shown / 2),
+                                 endAngle: angle(mid + shown / 2), clockwise: false)
                         let isLatest = i == records.count - 1
-                        let color: Color = day.rescued ? Theme.textSecondary
-                            : (isLatest ? Theme.accent : Theme.textPrimary.opacity(0.55 + 0.45 * Double(i) / Double(records.count)))
+                        let color: Color = day.rescued ? Theme.markMuted
+                            : (isLatest ? Theme.accent : Theme.textPrimary)
                         ctx.stroke(p, with: .color(color), style: StrokeStyle(lineWidth: line, lineCap: .round))
                     }
                 }
@@ -102,7 +99,7 @@ struct DayRingsLegend: View {
     var body: some View {
         HStack(spacing: Spacing.md) {
             item(color: Theme.textPrimary, text: "Won")
-            item(color: Theme.textSecondary, text: "Rescued")
+            item(color: Theme.markMuted, text: "Rescued")
             item(color: Theme.accent, text: "Today")
         }
     }
