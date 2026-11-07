@@ -24,6 +24,8 @@ struct DayGrid: View {
         if rescued { return [true, false, false, false] }
         return [true, day % 4 != 3, day % 3 != 0, day % 5 != 2]
     }
+    static let wonGold = Color(light: UIColor(hex: 0xC99A1C), dark: UIColor(hex: 0xF4C84A))
+
     /// Share of the day won, 0...1.
     static func level(day: Int, rescued: Bool) -> Double {
         let h = hits(day: day, rescued: rescued)
@@ -115,6 +117,12 @@ struct DayGrid: View {
                     }
                 }
                 .clipShape(shape)
+                if level >= 1 {
+                    // a won day: every topic done
+                    Circle().fill(DayGrid.wonGold)
+                        .frame(width: 10, height: 10)
+                        .shadow(color: DayGrid.wonGold.opacity(0.5), radius: 3)
+                }
                 if rec.rescued {
                     Image(systemName: "lifepreserver.fill")
                         .font(.system(size: 11, weight: .semibold))
@@ -159,7 +167,14 @@ struct DayGrid: View {
 struct DayGridLegend: View {
     var body: some View {
         HStack(spacing: Spacing.md) {
-            swatch(level: 1, color: Theme.textPrimary, "All won")
+            HStack(spacing: Spacing.xxs) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 3).fill(Theme.textPrimary)
+                    Circle().fill(DayGrid.wonGold).frame(width: 5, height: 5)
+                }
+                .frame(width: 12, height: 12)
+                Text("Won day").textStyle(.caption).foregroundStyle(Theme.textSecondary)
+            }
             swatch(level: 0.5, color: Theme.textPrimary, "Half")
             swatch(level: 0.25, color: Purpose.rescue.tint, "Rescued")
             swatch(level: 1, color: Theme.accent, "Today")
