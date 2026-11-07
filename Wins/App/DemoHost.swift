@@ -9,11 +9,11 @@ struct DemoHost: View {
     enum Mode: String { case welcome, rhythm, reason, topics, plan, set, day, check, rescue, progress }
 
     let state: Mode
-    var focusStyle: FocusStyle = .card
+    var focusStyle: FocusStyle = .ring
     private let container: ModelContainer
     private let now: Date
 
-    init(_ state: Mode, focus: FocusStyle = .card) {
+    init(_ state: Mode, focus: FocusStyle = .ring) {
         self.state = state
         self.focusStyle = focus
         container = try! ModelContainer(for: Profile.self, Plan.self, Block.self,
@@ -22,7 +22,7 @@ struct DemoHost: View {
         let hour: Double
         switch state {
         case .plan, .set, .check, .rescue, .progress: hour = 21.5
-        case .day: hour = 12.25
+        case .day: hour = 9.5
         default: hour = 9
         }
         now = DayKey.moment(today, hour: hour) ?? .now

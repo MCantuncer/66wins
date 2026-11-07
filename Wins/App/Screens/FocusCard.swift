@@ -90,7 +90,7 @@ struct FocusCard: View {
     /// Remaining minutes in the block, or minutes until it starts.
     private var minutesLeft: Int {
         if hourNow < block.start { return Int(((block.start - hourNow) * 60).rounded()) }
-        return max(0, Int(((block.start + block.duration - hourNow) * 60).rounded()))
+        return abs(Int(((block.start + block.duration - hourNow) * 60).rounded()))
     }
 
     private var timeLeftValue: String {
@@ -100,7 +100,7 @@ struct FocusCard: View {
 
     private var timeLeftUnit: String {
         if hourNow < block.start { return minutesLeft >= 60 ? "until start" : "min to start" }
-        if minutesLeft == 0 { return "over time" }
+        if hourNow > block.start + block.duration { return minutesLeft >= 60 ? "over" : "min over" }
         return minutesLeft >= 60 ? "left" : "min left"
     }
 
