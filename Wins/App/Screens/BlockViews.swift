@@ -7,6 +7,7 @@ struct BlockRow: View {
     let block: Block
     var isFirst: Bool = false
     var dimmed: Bool = false
+    var showsWonMark: Bool = true
 
     var body: some View {
         HStack(spacing: Spacing.md) {
@@ -35,7 +36,7 @@ struct BlockRow: View {
                 Text(DayKey.timeText(block.start)).textStyle(.meta).foregroundStyle(Theme.textPrimary)
                 Text("\(Int((block.duration * 60).rounded())) min").textStyle(.caption).foregroundStyle(Theme.textSecondary)
             }
-            if block.status == .won {
+            if showsWonMark && block.status == .won {
                 Image(systemName: "checkmark.circle.fill").foregroundStyle(Theme.accent)
             }
         }

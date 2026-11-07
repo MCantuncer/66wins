@@ -43,7 +43,7 @@ struct CheckScreen: View {
                                 b.status = (b.status == .won) ? .skipped : .won
                             } label: {
                                 HStack {
-                                    BlockRow(block: b)
+                                    BlockRow(block: b, showsWonMark: false)
                                     Image(systemName: b.status == .won ? "checkmark.circle.fill" : "circle")
                                         .font(.system(size: 22))
                                         .foregroundStyle(b.status == .won ? Theme.accent : Theme.textTertiary)
