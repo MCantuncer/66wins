@@ -329,7 +329,7 @@ struct BadgeEarnedInstrumentScreen: View {
 
             ScrollView {
                 VStack(spacing: 0) {
-                    DayRingsBadge(records: DayRecords.sample(days: moment.id), size: 290)
+                    DayRingsBadge(records: DayRecords.sample(days: moment.id), size: 250)
                         .padding(.top, Spacing.xs)
                     DayRingsLegend()
                         .padding(.top, Spacing.xxs)
