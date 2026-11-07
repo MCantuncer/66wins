@@ -105,9 +105,9 @@ struct FocusCard: View {
                     } label: {
                         Image(systemName: "checkmark")
                             .font(.system(size: 20, weight: .bold))
-                            .foregroundStyle(Theme.onAccent)
+                            .foregroundStyle(Theme.textPrimary)
                             .frame(width: 56, height: 56)
-                            .background(Theme.accentFill, in: Circle())
+                            .overlay(Circle().strokeBorder(Theme.textPrimary.opacity(0.35), lineWidth: 2))
                     }
                     .buttonStyle(.plain)
                     .accessibilityLabel("Finish \(block.steps[i])")
