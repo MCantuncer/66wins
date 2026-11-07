@@ -13,6 +13,7 @@ enum DesignCatalog {
     /// Register every design screen here.
     static let entries: [Entry] = [
         // Chosen direction: "Instrument".
+        Entry(id: "welcome", title: "Welcome") { AnyView(WelcomeInstrumentScreen()) },
         Entry(id: "evening-plan", title: "Tonight") { AnyView(TonightInstrumentScreen()) },
         Entry(id: "tomorrow-set", title: "Tomorrow is set") { AnyView(TomorrowSetInstrumentScreen()) },
         Entry(id: "morning-open", title: "Morning") { AnyView(MorningOpenInstrumentScreen()) },
