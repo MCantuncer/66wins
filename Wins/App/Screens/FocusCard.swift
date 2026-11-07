@@ -6,7 +6,14 @@ import SwiftUI
 // Progress across the steps sits above as a segmented bar; what comes next is a single quiet line.
 // Time left in the block is shown as a number, not a clock (time made visible, not computed).
 
+enum FocusStyle: String { case card, deck, ring, rail }
+
+extension EnvironmentValues {
+    @Entry var focusStyle: FocusStyle = .card
+}
+
 struct FocusCard: View {
+    @Environment(\.focusStyle) private var style
     let block: Block
     let hourNow: Double
     var onOpen: () -> Void = {}
@@ -21,8 +28,14 @@ struct FocusCard: View {
             header
 
             if !block.steps.isEmpty {
-                segments
-                stepArea
+                switch style {
+                case .card:
+                    segments
+                    stepArea
+                case .deck: deck
+                case .ring: ring
+                case .rail: rail
+                }
             } else {
                 Text(block.topic.why)
                     .textStyle(.body)
@@ -129,6 +142,151 @@ struct FocusCard: View {
                     .textStyle(.body)
                     .foregroundStyle(Theme.textPrimary)
             }
+        }
+    }
+
+    // MARK: - Variant A: a deck of step cards
+
+    private func finish(_ i: Int) {
+        withAnimation(.snappy) { block.toggleStep(i) }
+        completed += 1
+    }
+
+    @ViewBuilder
+    private var deck: some View {
+        if let i = current {
+            let remaining = block.steps.count - i
+            ZStack(alignment: .top) {
+                ForEach((1..<min(remaining, 3)).reversed(), id: \.self) { depth in
+                    RoundedRectangle(cornerRadius: 22, style: .continuous)
+                        .fill(Theme.surface.opacity(1 - Double(depth) * 0.25))
+                        .frame(height: 132)
+                        .scaleEffect(x: 1 - CGFloat(depth) * 0.06, y: 1, anchor: .top)
+                        .offset(y: CGFloat(depth) * 10)
+                }
+                VStack(alignment: .leading, spacing: Spacing.sm) {
+                    HStack {
+                        Text("\(i + 1) / \(block.steps.count)")
+                            .textStyle(.eyebrow).monospacedDigit()
+                            .foregroundStyle(Theme.textSecondary)
+                        Spacer()
+                        Image(systemName: "hand.draw")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(Theme.textTertiary)
+                    }
+                    Text(block.steps[i])
+                        .textStyle(.reasonCompact)
+                        .foregroundStyle(Theme.textPrimary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    Spacer(minLength: 0)
+                    HStack {
+                        Text("Swipe right when done").textStyle(.caption).foregroundStyle(Theme.textTertiary)
+                        Spacer()
+                        Image(systemName: "arrow.right").font(.system(size: 13, weight: .bold)).foregroundStyle(Theme.accent)
+                    }
+                }
+                .padding(Spacing.md)
+                .frame(height: 132)
+                .background(Theme.background, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+                .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).strokeBorder(Theme.separator, lineWidth: 1))
+                .gesture(DragGesture(minimumDistance: 30).onEnded { v in if v.translation.width > 80 { finish(i) } })
+                .accessibilityAction(named: "Done") { finish(i) }
+            }
+            .padding(.bottom, 20)
+        } else { allDone }
+    }
+
+    // MARK: - Variant B: progress around the check, like a watch complication
+
+    @ViewBuilder
+    private var ring: some View {
+        if let i = current {
+            HStack(spacing: Spacing.lg) {
+                Button { finish(i) } label: {
+                    ZStack {
+                        Circle().stroke(Theme.markTrack, lineWidth: 6)
+                        Circle()
+                            .trim(from: 0, to: CGFloat(doneCount) / CGFloat(max(block.steps.count, 1)))
+                            .stroke(Theme.accent, style: StrokeStyle(lineWidth: 6, lineCap: .round))
+                            .rotationEffect(.degrees(-90))
+                        ForEach(block.steps.indices, id: \.self) { k in
+                            Capsule().fill(Theme.surfaceRaised).frame(width: 2.5, height: 8)
+                                .offset(y: -41)
+                                .rotationEffect(.degrees(Double(k) / Double(block.steps.count) * 360))
+                        }
+                        Image(systemName: "checkmark").font(.system(size: 26, weight: .bold)).foregroundStyle(Theme.textPrimary)
+                    }
+                    .frame(width: 82, height: 82)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Finish \(block.steps[i])")
+
+                VStack(alignment: .leading, spacing: Spacing.xxs) {
+                    Text("\(doneCount) of \(block.steps.count) done")
+                        .textStyle(.eyebrow).foregroundStyle(Theme.textSecondary)
+                    Text(block.steps[i])
+                        .textStyle(.reasonCompact).foregroundStyle(Theme.textPrimary)
+                        .fixedSize(horizontal: false, vertical: true)
+                    if i + 1 < block.steps.count {
+                        Text("Then \(block.steps[i + 1])").textStyle(.caption).foregroundStyle(Theme.textTertiary).lineLimit(1)
+                    }
+                }
+                Spacer(minLength: 0)
+            }
+        } else { allDone }
+    }
+
+    // MARK: - Variant C: a transit line through the steps
+
+    private var rail: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            ForEach(block.steps.indices, id: \.self) { k in
+                let done = block.isStepDone(k)
+                let isCurrent = k == current
+                HStack(alignment: .center, spacing: Spacing.md) {
+                    ZStack {
+                        if k < block.steps.count - 1 {
+                            Rectangle()
+                                .fill(done ? Theme.accent : Theme.markTrack)
+                                .frame(width: 3)
+                                .frame(maxHeight: .infinity)
+                                .offset(y: isCurrent ? 32 : 22)
+                        }
+                        Circle()
+                            .fill(done ? Theme.accent : (isCurrent ? Theme.background : Theme.surfaceRaised))
+                            .overlay(Circle().strokeBorder(done ? Theme.accent : (isCurrent ? Theme.textPrimary : Theme.markTrack),
+                                                           lineWidth: isCurrent ? 3 : 2))
+                            .overlay { if done { Image(systemName: "checkmark").font(.system(size: 9, weight: .heavy)).foregroundStyle(Theme.onAccent) } }
+                            .frame(width: isCurrent ? 26 : 14, height: isCurrent ? 26 : 14)
+                    }
+                    .frame(width: 28)
+
+                    if isCurrent {
+                        HStack {
+                            Text(block.steps[k]).textStyle(.reasonCompact).foregroundStyle(Theme.textPrimary)
+                            Spacer()
+                            Button { finish(k) } label: {
+                                Text("Done").textStyle(.meta).foregroundStyle(Theme.textPrimary)
+                                    .padding(.horizontal, Spacing.md).frame(height: 36)
+                                    .overlay(Capsule().strokeBorder(Theme.textPrimary.opacity(0.35), lineWidth: 1.5))
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    } else {
+                        Text(block.steps[k])
+                            .textStyle(.body)
+                            .foregroundStyle(done ? Theme.textTertiary : Theme.textSecondary)
+                    }
+                }
+                .frame(height: isCurrent ? 64 : 44)
+            }
+        }
+    }
+
+    private var allDone: some View {
+        HStack(spacing: Spacing.sm) {
+            Image(systemName: "checkmark.seal.fill").foregroundStyle(Theme.accent)
+            Text("Every step done. Tap Done to win the block.").textStyle(.body).foregroundStyle(Theme.textPrimary)
         }
     }
 }

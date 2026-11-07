@@ -9,11 +9,13 @@ struct DemoHost: View {
     enum Mode: String { case welcome, rhythm, reason, topics, plan, set, day, check, rescue, progress }
 
     let state: Mode
+    var focusStyle: FocusStyle = .card
     private let container: ModelContainer
     private let now: Date
 
-    init(_ state: Mode) {
+    init(_ state: Mode, focus: FocusStyle = .card) {
         self.state = state
+        self.focusStyle = focus
         container = try! ModelContainer(for: Profile.self, Plan.self, Block.self,
                                         configurations: ModelConfiguration(isStoredInMemoryOnly: true))
         let today = DayKey.today()
@@ -37,6 +39,7 @@ struct DemoHost: View {
             }
         }
         .modelContainer(container)
+        .environment(\.focusStyle, focusStyle)
     }
 
     private var profile: Profile {
