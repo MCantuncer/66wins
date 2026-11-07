@@ -3,7 +3,7 @@ import SwiftUI
 // MARK: - The 66-day grid
 //
 // One cell per day of the 66. Columns are weeks, rows are weekdays (the run started on a Wednesday).
-// Each past day shows its own wins as three small pips, tinted by purpose (Write, Run, Call Mum).
+// Each past day fills from the bottom by how much of it was won (Wake routine, Work, Gym, Bedtime).
 // Consecutive days are joined by a quiet link, so a run of days reads as one piece (a chain, felt not drawn).
 // A rescued day keeps the chain with a dotted link. Earned milestones carry a small seal; the ones
 // ahead show their badge; the road to the next milestone is drawn a little brighter.
@@ -19,12 +19,16 @@ struct DayGrid: View {
     private var today: Int { records.count }
     private var nextMilestone: Int { MilestoneStory.moments.map(\.id).first { $0 > today } ?? total }
 
-    /// Which habits were won on a day: Write, Run, Call Mum.
+    /// Which topics were won on a day: Wake routine, Work, Gym, Bedtime.
     static func hits(day: Int, rescued: Bool) -> [Bool] {
-        if rescued { return [true, false, false] }
-        return [true, day % 4 != 3, day % 5 != 2]
+        if rescued { return [true, false, false, false] }
+        return [true, day % 4 != 3, day % 3 != 0, day % 5 != 2]
     }
-    static let habitPurposes: [Purpose] = [.growth, .health, .family]
+    /// Share of the day won, 0...1.
+    static func level(day: Int, rescued: Bool) -> Double {
+        let h = hits(day: day, rescued: rescued)
+        return Double(h.filter { $0 }.count) / Double(h.count)
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.xs) {
@@ -98,33 +102,37 @@ struct DayGrid: View {
         let shape = RoundedRectangle(cornerRadius: 8, style: .continuous)
         if day <= today {
             let rec = records[day - 1]
-            let hits = Self.hits(day: day, rescued: rec.rescued)
             ZStack {
                 shape.fill(Theme.surfaceRaised)
-                if day == today {
-                    shape.strokeBorder(Theme.accent, lineWidth: 2)
-                        .shadow(color: Theme.accent.opacity(0.6), radius: 6)
+                // the day fills from the bottom by how much of it you won
+                let level = Self.level(day: day, rescued: rec.rescued)
+                GeometryReader { g in
+                    VStack(spacing: 0) {
+                        Spacer(minLength: 0)
+                        Rectangle()
+                            .fill(day == today ? Theme.accent : (rec.rescued ? Purpose.rescue.tint : Theme.textPrimary))
+                            .frame(height: g.size.height * level)
+                    }
                 }
+                .clipShape(shape)
                 if rec.rescued {
                     Image(systemName: "lifepreserver.fill")
-                        .font(.system(size: 12, weight: .semibold))
+                        .font(.system(size: 11, weight: .semibold))
                         .foregroundStyle(Purpose.rescue.tint)
-                } else {
-                    HStack(spacing: 3) {
-                        ForEach(0..<3, id: \.self) { i in
-                            Capsule()
-                                .fill(hits[i] ? Self.habitPurposes[i].tint : Theme.markTrack)
-                                .frame(width: 4, height: hits[i] ? 14 : 6)
-                                .frame(height: 14, alignment: .bottom)
-                        }
-                    }
+                        .offset(y: -4)
                 }
                 if let m = MilestoneStory.moments.first(where: { $0.id == day }) {
                     Image(systemName: "checkmark.seal.fill")
                         .font(.system(size: 11, weight: .bold))
-                        .foregroundStyle(Theme.textPrimary, Theme.background)
+                        .foregroundStyle(Theme.background, Theme.textPrimary)
                         .offset(x: cell / 2 - 3, y: -cell / 2 + 3)
                         .accessibilityLabel(m.name)
+                }
+            }
+            .overlay {
+                if day == today {
+                    shape.strokeBorder(Theme.accent, lineWidth: 2)
+                        .shadow(color: Theme.accent.opacity(0.6), radius: 6)
                 }
             }
             .frame(width: cell, height: cell)
@@ -147,21 +155,25 @@ struct DayGrid: View {
     }
 }
 
-/// Legend: what the pips mean, plus rescue.
+/// Legend: how full a day is, plus rescue and today.
 struct DayGridLegend: View {
-    private let items: [(String, Purpose)] = [("Write", .growth), ("Run", .health), ("Mum", .family)]
     var body: some View {
         HStack(spacing: Spacing.md) {
-            ForEach(items.indices, id: \.self) { i in
-                HStack(spacing: Spacing.xxs) {
-                    Capsule().fill(items[i].1.tint).frame(width: 4, height: 12)
-                    Text(items[i].0).textStyle(.caption).foregroundStyle(Theme.textSecondary)
-                }
+            swatch(level: 1, color: Theme.textPrimary, "All won")
+            swatch(level: 0.5, color: Theme.textPrimary, "Half")
+            swatch(level: 0.25, color: Purpose.rescue.tint, "Rescued")
+            swatch(level: 1, color: Theme.accent, "Today")
+        }
+    }
+    private func swatch(level: Double, color: Color, _ text: String) -> some View {
+        HStack(spacing: Spacing.xxs) {
+            ZStack(alignment: .bottom) {
+                RoundedRectangle(cornerRadius: 3).fill(Theme.surfaceRaised)
+                Rectangle().fill(color).frame(height: 12 * level)
             }
-            HStack(spacing: Spacing.xxs) {
-                Image(systemName: "lifepreserver.fill").font(.system(size: 11)).foregroundStyle(Purpose.rescue.tint)
-                Text("Rescued").textStyle(.caption).foregroundStyle(Theme.textSecondary)
-            }
+            .frame(width: 12, height: 12)
+            .clipShape(RoundedRectangle(cornerRadius: 3))
+            Text(text).textStyle(.caption).foregroundStyle(Theme.textSecondary)
         }
     }
 }
