@@ -20,6 +20,7 @@ enum DesignCatalog {
         Entry(id: "app-plan", title: "App: Tonight") { AnyView(DemoHost(.plan)) },
         Entry(id: "app-set", title: "App: Tomorrow is set") { AnyView(DemoHost(.set)) },
         Entry(id: "app-day", title: "App: The day") { AnyView(DemoHost(.day)) },
+        Entry(id: "app-focus-compare", title: "App: Step card variants") { AnyView(FocusCompare()) },
         Entry(id: "app-day-deck", title: "App: The day (deck)") { AnyView(DemoHost(.day, focus: .deck)) },
         Entry(id: "app-day-ring", title: "App: The day (ring)") { AnyView(DemoHost(.day, focus: .ring)) },
         Entry(id: "app-day-rail", title: "App: The day (rail)") { AnyView(DemoHost(.day, focus: .rail)) },

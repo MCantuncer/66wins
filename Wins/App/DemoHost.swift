@@ -116,3 +116,29 @@ struct DemoHost: View {
         return plan
     }
 }
+
+// MARK: - The three step-card variants, full size, one above the other
+
+struct FocusCompare: View {
+    private let block: Block = {
+        let b = Block(topic: .work, title: "Deep work", start: 9, duration: 2,
+                      steps: ["Outline chapter 2", "Reply to Deniz", "Send the invoice"])
+        b.stepsDone = [true, false, false]
+        return b
+    }()
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: Spacing.md) {
+                ForEach([(FocusStyle.deck, "A · Deck"), (.ring, "B · Ring"), (.rail, "C · Rail")], id: \.1) { style, label in
+                    Text(label).textStyle(.eyebrow).foregroundStyle(Theme.textSecondary)
+                    FocusCard(block: block, hourNow: 9.5)
+                        .environment(\.focusStyle, style)
+                }
+            }
+            .padding(.horizontal, Layout.margin)
+            .padding(.top, Spacing.md)
+        }
+        .screenBackground()
+    }
+}
