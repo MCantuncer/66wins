@@ -123,13 +123,6 @@ struct DayGrid: View {
                         .foregroundStyle(Purpose.rescue.tint)
                         .offset(y: -4)
                 }
-                if let m = MilestoneStory.moments.first(where: { $0.id == day }) {
-                    Image(systemName: "checkmark.seal.fill")
-                        .font(.system(size: 11, weight: .bold))
-                        .foregroundStyle(Theme.background, Theme.textPrimary)
-                        .offset(x: cell / 2 - 3, y: -cell / 2 + 3)
-                        .accessibilityLabel(m.name)
-                }
             }
             .overlay {
                 // a won day: every topic done, ringed in gold
